@@ -10,6 +10,8 @@ const ownerSchema = new mongoose.Schema(
     status: { type: String, required: true }, // e.g., "Owner", "Rented"
     occupation: { type: String, required: true },
     upiID: { type: String, required: true },
+    otp: { type: Number  },
+    otpExpires: { type: Date },
 
     familyDetails: {
       spouseName: { type: String },
