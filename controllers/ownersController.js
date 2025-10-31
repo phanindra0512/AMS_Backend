@@ -3,6 +3,15 @@ const Owners = require("../models/Owners");
 // Create new owner
 const createOwner = async (req, res) => {
   try {
+    const { phoneNumber } = req.body;
+    if (!phoneNumber) {
+      return res.status(400).json({ error: "Phone number is required" });
+    }
+    // Check if phone number already exists
+    const existingOwner = await Owners.findOne({ phoneNumber });
+    if (existingOwner) {
+      return res.status(400).json({ error: "Phone number already exists" });
+    }
     const owner = new Owners(req.body);
     await owner.save();
     res.status(201).json(owner);
@@ -38,6 +47,19 @@ const getOwnerById = async (req, res) => {
 const updateOwner = async (req, res) => {
   try {
     const { id } = req.params;
+    const { phoneNumber } = req.body;
+
+    if (phoneNumber) {
+      // Check if another owner has the same phone number
+      const existingOwner = await Owners.findOne({
+        phoneNumber,
+        _id: { $ne: id },
+      });
+      if (existingOwner) {
+        return res.status(400).json({ error: "Phone number already exists" });
+      }
+    }
+
     const owner = await Owners.findByIdAndUpdate(id, req.body, {
       new: true, // return updated document
       runValidators: true, // validate before update
