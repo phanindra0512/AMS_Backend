@@ -3,14 +3,21 @@ const mongoose = require("mongoose");
 const ownerSchema = new mongoose.Schema(
   {
     name: { type: String, required: true },
-    phoneNumber: { type: String, required: true },
+    phoneNumber: { type: String, required: true, unique: true },
     flatNumber: { type: String, required: true },
     floorNumber: { type: String, required: true },
     flatType: { type: String, required: true },
-    status: { type: String, required: true }, // e.g., "Owner", "Rented"
+    status: { type: String, enum: ["Owner", "Rented"], required: true },
     occupation: { type: String, required: true },
     upiID: { type: String, required: true },
-    otp: { type: Number  },
+
+    role: {
+      type: String,
+      enum: ["resident", "treasurer"],
+      default: "resident",
+    },
+
+    otp: { type: Number },
     otpExpires: { type: Date },
 
     familyDetails: {
@@ -23,7 +30,7 @@ const ownerSchema = new mongoose.Schema(
       ],
     },
   },
-  { timestamps: true }
+  { timestamps: true, strict: true, minimize: false }
 );
 
 module.exports = mongoose.model("Owner", ownerSchema);

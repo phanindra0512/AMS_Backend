@@ -4,6 +4,7 @@ const {
   getOwners,
   updateOwner,
   getOwnerById,
+  deleteOwner,
 } = require("../controllers/ownersController");
 const router = express.Router();
 
@@ -11,7 +12,7 @@ const router = express.Router();
  * @swagger
  * tags:
  *   name: Owners
- *   description: Owner management endpoints
+ *   description: APIs for managing apartment owners
  */
 
 /**
@@ -53,6 +54,7 @@ const router = express.Router();
  *                 example: "2BHK"
  *               status:
  *                 type: string
+ *                 enum: ["Owner", "Rented"]
  *                 example: "Owner"
  *               occupation:
  *                 type: string
@@ -83,32 +85,34 @@ const router = express.Router();
  *         content:
  *           application/json:
  *             example:
- *               name: "Raju Kumar"
- *               phoneNumber: "9949544127"
- *               flatNumber: "A-202"
- *               floorNumber: "1"
- *               flatType: "2BHK"
- *               status: "Owner"
- *               occupation: "Software Engineer"
- *               upiID: "raju@upi"
- *               familyDetails:
- *                 spouseName: "Anita Kumar"
- *                 numberOfChildren: 2
- *                 children:
- *                   - name: "Aryan Kumar"
- *                     _id: "68fb67d768e91f30950cd46e"
- *                   - name: "Riya Kumar"
- *                     _id: "68fb67d768e91f30950cd46f"
- *               _id: "68fb67d768e91f30950cd46d"
- *               createdAt: "2025-10-24T11:49:43.603Z"
- *               updatedAt: "2025-10-24T11:49:43.603Z"
- *               __v: 0
+ *               message: "Owner created successfully"
+ *               data:
+ *                 _id: "6731b123a3d45d88a5c12345"
+ *                 name: "Raju Kumar"
+ *                 phoneNumber: "9949544127"
+ *                 flatNumber: "A-202"
+ *                 floorNumber: "1"
+ *                 flatType: "2BHK"
+ *                 status: "Owner"
+ *                 occupation: "Software Engineer"
+ *                 upiID: "raju@upi"
+ *                 role: "resident"
+ *                 familyDetails:
+ *                   spouseName: "Anita Kumar"
+ *                   numberOfChildren: 2
+ *                   children:
+ *                     - name: "Aryan Kumar"
+ *                     - name: "Riya Kumar"
+ *                 createdAt: "2025-10-24T11:49:43.603Z"
+ *                 updatedAt: "2025-10-24T11:49:43.603Z"
  *       400:
- *         description: Validation or bad request
+ *         description: Phone number missing or duplicate
  *         content:
  *           application/json:
  *             example:
- *               error: "Validation error message"
+ *               error: "Phone number already exists"
+ *       500:
+ *         description: Server error
  */
 
 /**
@@ -123,35 +127,7 @@ const router = express.Router();
  *         content:
  *           application/json:
  *             example:
- *               - familyDetails:
- *                   spouseName: "Anita Kumar"
- *                   numberOfChildren: 2
- *                   children:
- *                     - name: "Aryan Kumar"
- *                       _id: "68d4283f42cb55a555f7765b"
- *                     - name: "Riya Kumar"
- *                       _id: "68d4283f42cb55a555f7765c"
- *                 _id: "68d4283f42cb55a555f7765a"
- *                 name: "Phani Kumar"
- *                 phoneNumber: "9876543210"
- *                 flatNumber: "A-102"
- *                 floorNumber: "1"
- *                 flatType: "2BHK"
- *                 status: "Owner"
- *                 occupation: "Software Engineer"
- *                 upiID: "ravi@upi"
- *                 createdAt: "2025-09-24T17:19:59.691Z"
- *                 updatedAt: "2025-09-24T17:31:06.213Z"
- *                 __v: 0
- *               - familyDetails:
- *                   spouseName: "Anita Kumar"
- *                   numberOfChildren: 2
- *                   children:
- *                     - name: "Aryan Kumar"
- *                       _id: "68d42c125c2d73eac40b9f59"
- *                     - name: "Riya Kumar"
- *                       _id: "68d42c125c2d73eac40b9f5a"
- *                 _id: "68d42c125c2d73eac40b9f58"
+ *               - _id: "6731b123a3d45d88a5c12345"
  *                 name: "Raju Kumar"
  *                 phoneNumber: "9949544127"
  *                 flatNumber: "A-202"
@@ -159,14 +135,12 @@ const router = express.Router();
  *                 flatType: "2BHK"
  *                 status: "Owner"
  *                 occupation: "Software Engineer"
- *                 upiID: "ravi@upi"
- *                 createdAt: "2025-09-24T17:36:18.359Z"
- *                 updatedAt: "2025-10-24T11:20:03.260Z"
- *                 __v: 0
- *                 otp: null
- *                 otpExpires: null
+ *                 upiID: "raju@upi"
+ *                 role: "resident"
+ *                 createdAt: "2025-10-24T11:49:43.603Z"
+ *                 updatedAt: "2025-10-24T11:49:43.603Z"
  *       500:
- *         description: Server error
+ *         description: Internal server error
  *         content:
  *           application/json:
  *             example:
@@ -177,21 +151,22 @@ const router = express.Router();
  * @swagger
  * /api/owners/getOwnerById/{id}:
  *   get:
- *     summary: Get owner by ID
+ *     summary: Get a single owner by ID
  *     tags: [Owners]
  *     parameters:
- *       - in: path
- *         name: id
+ *       - name: id
+ *         in: path
  *         required: true
+ *         description: Owner ID
  *         schema:
  *           type: string
- *         description: Owner ID
  *     responses:
  *       200:
- *         description: Owner found
+ *         description: Owner details retrieved successfully
  *         content:
  *           application/json:
  *             example:
+ *               _id: "6731b123a3d45d88a5c12345"
  *               name: "Raju Kumar"
  *               phoneNumber: "9949544127"
  *               flatNumber: "A-202"
@@ -200,39 +175,42 @@ const router = express.Router();
  *               status: "Owner"
  *               occupation: "Software Engineer"
  *               upiID: "raju@upi"
+ *               role: "resident"
  *               familyDetails:
  *                 spouseName: "Anita Kumar"
  *                 numberOfChildren: 2
  *                 children:
  *                   - name: "Aryan Kumar"
- *                     _id: "68fb67d768e91f30950cd46e"
  *                   - name: "Riya Kumar"
- *                     _id: "68fb67d768e91f30950cd46f"
- *               _id: "68fb67d768e91f30950cd46d"
  *               createdAt: "2025-10-24T11:49:43.603Z"
  *               updatedAt: "2025-10-24T11:49:43.603Z"
- *               __v: 0
  *       404:
  *         description: Owner not found
  *         content:
  *           application/json:
  *             example:
  *               error: "Owner not found"
+ *       500:
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             example:
+ *               error: "Internal server error"
  */
 
 /**
  * @swagger
  * /api/owners/updateOwner/{id}:
  *   put:
- *     summary: Update owner details
+ *     summary: Update an existing owner's details
  *     tags: [Owners]
  *     parameters:
- *       - in: path
- *         name: id
+ *       - name: id
+ *         in: path
  *         required: true
+ *         description: Owner ID
  *         schema:
  *           type: string
- *         description: Owner ID
  *     requestBody:
  *       required: true
  *       content:
@@ -243,27 +221,24 @@ const router = express.Router();
  *               name:
  *                 type: string
  *                 example: "Raju Kumar Updated"
- *               phoneNumber:
- *                 type: string
- *                 example: "9949544127"
  *               flatNumber:
  *                 type: string
- *                 example: "A-202"
+ *                 example: "A-203"
  *               floorNumber:
  *                 type: string
- *                 example: "1"
+ *                 example: "2"
  *               flatType:
  *                 type: string
- *                 example: "2BHK"
+ *                 example: "3BHK"
  *               status:
  *                 type: string
  *                 example: "Owner"
  *               occupation:
  *                 type: string
- *                 example: "Software Engineer"
+ *                 example: "Manager"
  *               upiID:
  *                 type: string
- *                 example: "raju@upi"
+ *                 example: "rajuupdated@upi"
  *               familyDetails:
  *                 type: object
  *                 properties:
@@ -283,30 +258,23 @@ const router = express.Router();
  *                           example: "Aryan Kumar"
  *     responses:
  *       200:
- *         description: Owner updated successfully
+ *         description: Owner details updated successfully
  *         content:
  *           application/json:
  *             example:
- *               name: "Raju Kumar Updated"
- *               phoneNumber: "9949544127"
- *               flatNumber: "A-202"
- *               floorNumber: "1"
- *               flatType: "2BHK"
- *               status: "Owner"
- *               occupation: "Software Engineer"
- *               upiID: "raju@upi"
- *               familyDetails:
- *                 spouseName: "Anita Kumar"
- *                 numberOfChildren: 2
- *                 children:
- *                   - name: "Aryan Kumar"
- *                     _id: "68fb67d768e91f30950cd46e"
- *                   - name: "Riya Kumar"
- *                     _id: "68fb67d768e91f30950cd46f"
- *               _id: "68fb67d768e91f30950cd46d"
- *               createdAt: "2025-10-24T11:49:43.603Z"
- *               updatedAt: "2025-10-24T12:10:00.000Z"
- *               __v: 0
+ *               message: "Owner details updated successfully"
+ *               data:
+ *                 _id: "6731b123a3d45d88a5c12345"
+ *                 name: "Raju Kumar Updated"
+ *                 flatNumber: "A-203"
+ *                 floorNumber: "2"
+ *                 flatType: "3BHK"
+ *                 status: "Owner"
+ *                 occupation: "Manager"
+ *                 upiID: "rajuupdated@upi"
+ *                 role: "resident"
+ *                 createdAt: "2025-10-24T11:49:43.603Z"
+ *                 updatedAt: "2025-10-25T09:12:11.000Z"
  *       404:
  *         description: Owner not found
  *         content:
@@ -314,17 +282,53 @@ const router = express.Router();
  *             example:
  *               error: "Owner not found"
  *       400:
- *         description: Validation error / bad request
+ *         description: Invalid data
  *         content:
  *           application/json:
  *             example:
  *               error: "Validation error message"
+ *       500:
+ *         description: Server error
  */
 
+/**
+ * @swagger
+ * /api/owners/deleteOwner/{id}:
+ *   delete:
+ *     summary: Delete owner by ID (ADMIN)
+ *     tags: [Owners]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Owner ID
+ *     responses:
+ *       200:
+ *         description: Owner deleted successfully
+ *         content:
+ *           application/json:
+ *             example:
+ *               message: "Owner deleted successfully"
+ *       404:
+ *         description: Owner not found
+ *         content:
+ *           application/json:
+ *             example:
+ *               error: "Owner not found"
+ *       500:
+ *         description: Server error
+ *         content:
+ *           application/json:
+ *             example:
+ *               error: "Internal server error"
+ */
 
-router.post("/createOwner", createOwner); // POST /api/owners - Create new owner
-router.get("/getAllOwners", getOwners); // GET /api/owners - Get all owners
-router.put("/updateOwner/:id", updateOwner); // PUT /api/owners/:id  (update owner)
-router.get("/getOwnerById/:id", getOwnerById); // GET /api/owners/:id (get owner by ID)
+router.post("/createOwner", createOwner);
+router.get("/getAllOwners", getOwners);
+router.get("/getOwnerById/:id", getOwnerById);
+router.put("/updateOwner/:id", updateOwner);
+router.delete("/deleteOwner/:id", deleteOwner); // DELETE /api/owners/:id
 
 module.exports = router;
