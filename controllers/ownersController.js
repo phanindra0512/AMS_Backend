@@ -1,4 +1,5 @@
 const Owner = require("../models/Owners");
+const TreasurerAssignment = require("../models/TreasurerAssignment");
 
 // ✅ Create a new owner
 const createOwner = async (req, res) => {
@@ -106,10 +107,98 @@ const deleteOwner = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
+
+// ✅ Assign treasurer to a particular owner
+const assignTreasurer = async (req, res) => {
+  try {
+    const { ownerId, month, year } = req.body;
+
+    if (!ownerId || !month || !year) {
+      return res
+        .status(400)
+        .json({ error: "ownerId, month, and year are required" });
+    }
+
+    const existing = await TreasurerAssignment.findOne({ month, year });
+    if (existing) {
+      return res.status(400).json({
+        error: `A treasurer is already assigned for ${month}-${year}`,
+      });
+    }
+
+    // 1️⃣ Revert any existing treasurer to 'resident'
+    await Owner.updateMany({ role: "treasurer" }, { role: "resident" });
+
+    // 2️⃣ Assign new treasurer
+    const updatedOwner = await Owner.findByIdAndUpdate(
+      ownerId,
+      { role: "treasurer" },
+      { new: true }
+    );
+
+    if (!updatedOwner) {
+      return res.status(404).json({ error: "Owner not found" });
+    }
+
+    // 3️⃣ Store assignment for history
+    const assignment = new TreasurerAssignment({
+      ownerId,
+      month,
+      year,
+    });
+    await assignment.save();
+
+    res.status(200).json({
+      message: `Treasurer assigned successfully for ${month}-${year}`,
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+// ✅ Get treasurer details by month & year
+const getTreasurerByMonthYear = async (req, res) => {
+  try {
+    const { month, year } = req.query;
+
+    if (!month || !year) {
+      return res
+        .status(400)
+        .json({ error: "month and year are required query parameters" });
+    }
+
+    // Convert query params to numbers
+    const numericMonth = Number(month);
+    const numericYear = Number(year);
+
+    // Find the treasurer assignment and populate owner details
+    const assignment = await TreasurerAssignment.findOne({
+      month: numericMonth,
+      year: numericYear,
+    }).populate("ownerId");
+
+    if (!assignment) {
+      return res
+        .status(404)
+        .json({ error: `No treasurer assigned for ${month}-${year}` });
+    }
+
+    // ✅ Return only the owner details
+    res.status(200).json({
+      message: `Treasurer details for ${month}-${year}`,
+      data: assignment.ownerId, // only owner info
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
 module.exports = {
   createOwner,
   getOwners,
   getOwnerById,
   updateOwner,
   deleteOwner,
+  assignTreasurer,
+  getTreasurerByMonthYear,
 };

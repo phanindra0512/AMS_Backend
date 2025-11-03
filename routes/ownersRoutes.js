@@ -5,6 +5,8 @@ const {
   updateOwner,
   getOwnerById,
   deleteOwner,
+  assignTreasurer,
+  getTreasurerByMonthYear,
 } = require("../controllers/ownersController");
 const router = express.Router();
 
@@ -325,10 +327,187 @@ const router = express.Router();
  *               error: "Internal server error"
  */
 
+/**
+ * @swagger
+ * /api/owners/treasurer:
+ *   get:
+ *     summary: Get Treasurer Details by Month and Year
+ *     description: Fetch the owner assigned as treasurer for a specific month and year.
+ *     tags: [Owners]
+ *     parameters:
+ *       - in: query
+ *         name: month
+ *         required: true
+ *         schema:
+ *           type: integer
+ *           example: 11
+ *         description: The month number (1–12)
+ *       - in: query
+ *         name: year
+ *         required: true
+ *         schema:
+ *           type: integer
+ *           example: 2025
+ *         description: The year
+ *     responses:
+ *       200:
+ *         description: Treasurer details fetched successfully.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Treasurer details for 11-2025
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     _id:
+ *                       type: string
+ *                       example: 69089dbf656dd5cc0b84e0c6
+ *                     name:
+ *                       type: string
+ *                       example: Raju Kumar
+ *                     phoneNumber:
+ *                       type: string
+ *                       example: "9949544101"
+ *                     flatNumber:
+ *                       type: string
+ *                       example: A-202
+ *                     floorNumber:
+ *                       type: string
+ *                       example: "1"
+ *                     flatType:
+ *                       type: string
+ *                       example: 2BHK
+ *                     occupation:
+ *                       type: string
+ *                       example: Software Engineer
+ *                     upiID:
+ *                       type: string
+ *                       example: raju@upi
+ *                     role:
+ *                       type: string
+ *                       example: treasurer
+ *       400:
+ *         description: Missing or invalid query parameters.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: month and year are required query parameters
+ *       404:
+ *         description: No treasurer found for the given month and year.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: No treasurer assigned for 11-2025
+ *       500:
+ *         description: Internal server error.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: Internal server error
+ */
+
+/**
+ * @swagger
+ * /api/owners/assign-treasurer:
+ *   post:
+ *     summary: Assign Treasurer for a Month and Year
+ *     description: Assign an owner as treasurer for a given month and year.
+ *     tags: [Owners]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - ownerId
+ *               - month
+ *               - year
+ *             properties:
+ *               ownerId:
+ *                 type: string
+ *                 example: 69089dbf656dd5cc0b84e0c6
+ *               month:
+ *                 type: integer
+ *                 example: 11
+ *               year:
+ *                 type: integer
+ *                 example: 2025
+ *     responses:
+ *       200:
+ *         description: Treasurer assigned successfully.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Treasurer assigned successfully for 11-2025
+ *       400:
+ *         description: Missing or invalid input data.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: ownerId, month, and year are required fields
+ *       404:
+ *         description: Owner not found.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: Owner not found
+ *       409:
+ *         description: Treasurer already assigned for the given month and year.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: Treasurer already assigned for 11-2025
+ *       500:
+ *         description: Internal server error.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: Internal server error
+ */
+
 router.post("/createOwner", createOwner);
 router.get("/getAllOwners", getOwners);
 router.get("/getOwnerById/:id", getOwnerById);
 router.put("/updateOwner/:id", updateOwner);
-router.delete("/deleteOwner/:id", deleteOwner); // DELETE /api/owners/:id
+router.delete("/deleteOwner/:id", deleteOwner);
+router.get("/treasurer", getTreasurerByMonthYear); // 👈 MUST come before /:id
+router.post("/assign-treasurer", assignTreasurer);
 
 module.exports = router;
