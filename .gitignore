@@ -8,6 +8,10 @@ pnpm-debug.log
 # Environment variables
 .env
 
+# Uploaded files
+uploads/
+uploads/receipts/
+
 # Logs
 logs
 *.log

@@ -29,15 +29,20 @@ app.get("/", (req, res) => {
   res.send("API is working 🚀");
 });
 
-// Import routes
-const userRoutes = require("./routes/userRoutes");
-app.use("/api/users", userRoutes);
 
 const ownersRoutes = require("./routes/ownersRoutes");
 app.use("/api/owners", ownersRoutes);
 
 const authRoutes = require("./routes/authRoutes");
 app.use("/api/auth", authRoutes);
+
+const maintenanceRoutes = require("./routes/maintenanceRoutes");
+
+// Serve uploaded files
+app.use("/uploads", express.static("uploads"));
+
+app.use("/api/maintenance", maintenanceRoutes);
+
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

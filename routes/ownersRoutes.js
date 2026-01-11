@@ -1,4 +1,6 @@
 const express = require("express");
+const auth = require("../middlewares/auth");
+const authorize = require("../middlewares/authorize");
 const {
   createOwner,
   getOwners,
@@ -123,6 +125,8 @@ const router = express.Router();
  *   get:
  *     summary: Get all owners
  *     tags: [Owners]
+ *     security:
+ *       - bearerAuth: []
  *     responses:
  *       200:
  *         description: List of all owners
@@ -334,6 +338,8 @@ const router = express.Router();
  *     summary: Get Treasurer Details by Month and Year
  *     description: Fetch the owner assigned as treasurer for a specific month and year.
  *     tags: [Owners]
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: query
  *         name: month
@@ -429,6 +435,8 @@ const router = express.Router();
  *     summary: Assign Treasurer for a Month and Year
  *     description: Assign an owner as treasurer for a given month and year.
  *     tags: [Owners]
+ *     security:
+ *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -503,11 +511,11 @@ const router = express.Router();
  */
 
 router.post("/createOwner", createOwner);
-router.get("/getAllOwners", getOwners);
+router.get("/getAllOwners", auth, getOwners);
 router.get("/getOwnerById/:id", getOwnerById);
 router.put("/updateOwner/:id", updateOwner);
 router.delete("/deleteOwner/:id", deleteOwner);
-router.get("/treasurer", getTreasurerByMonthYear); // 👈 MUST come before /:id
-router.post("/assign-treasurer", assignTreasurer);
+router.get("/treasurer", auth, getTreasurerByMonthYear);
+router.post("/assign-treasurer", auth, authorize("ADMIN"), assignTreasurer);
 
 module.exports = router;

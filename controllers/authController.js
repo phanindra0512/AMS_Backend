@@ -1,4 +1,5 @@
 const Owners = require("../models/Owners");
+const jwt = require("jsonwebtoken");
 
 // Send OTP
 const sendOtp = async (req, res) => {
@@ -58,10 +59,17 @@ const verifyOtp = async (req, res) => {
     owner.otpExpires = null;
     await owner.save();
 
+    const token = jwt.sign(
+    { id: owner._id, role: owner.role },
+    process.env.JWT_SECRET,
+    { expiresIn: "1h" }
+  );
+
     // Return owner info
     res.json({
       success: true,
       message: "OTP verified successfully",
+      token,
       owner,
     });
   } catch (err) {

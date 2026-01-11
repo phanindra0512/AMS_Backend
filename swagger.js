@@ -1,23 +1,40 @@
 const swaggerJSDoc = require("swagger-jsdoc");
 const swaggerUi = require("swagger-ui-express");
 
-// Swagger configuration
 const options = {
   definition: {
     openapi: "3.0.0",
     info: {
-      title: "My Express API",
+      title: "Apartment Management System API",
       version: "1.0.0",
-      description: "API documentation for OTP authentication and other routes",
+      description: "AMS APIs with JWT Authentication",
     },
     servers: [
       {
-        url: "http://localhost:5000", // update this when deployed
+        url: "http://localhost:5000",
+      },
+    ],
+
+    // 🔐 ADD THIS PART
+    components: {
+      securitySchemes: {
+        bearerAuth: {
+          type: "http",
+          scheme: "bearer",
+          bearerFormat: "JWT",
+        },
+      },
+    },
+
+    // 🔐 GLOBAL SECURITY (can override per route)
+    security: [
+      {
+        bearerAuth: [],
       },
     ],
   },
-  // Path to route files
-  apis: ["./routes/*.js"], // all route files will be scanned for docs
+
+  apis: ["./routes/*.js"],
 };
 
 const swaggerSpec = swaggerJSDoc(options);

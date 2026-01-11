@@ -20,7 +20,7 @@ const createOwner = async (req, res) => {
     // 3️⃣ Prepare data (role defaults to resident)
     const ownerData = {
       ...req.body,
-      role: req.body.role || "resident",
+      role: req.body.role || "RESIDENT",
     };
 
     // 4️⃣ Create owner
@@ -127,12 +127,12 @@ const assignTreasurer = async (req, res) => {
     }
 
     // 1️⃣ Revert any existing treasurer to 'resident'
-    await Owner.updateMany({ role: "treasurer" }, { role: "resident" });
+    await Owner.updateMany({ role: "TREASURER" }, { role: "RESIDENT" });
 
     // 2️⃣ Assign new treasurer
     const updatedOwner = await Owner.findByIdAndUpdate(
       ownerId,
-      { role: "treasurer" },
+      { role: "TREASURER" },
       { new: true }
     );
 

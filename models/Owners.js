@@ -13,11 +13,11 @@ const ownerSchema = new mongoose.Schema(
 
     role: {
       type: String,
-      enum: ["resident", "treasurer"],
-      default: "resident",
+      enum: ["ADMIN", "RESIDENT", "TREASURER"],
+      default: "RESIDENT",
     },
 
-    otp: { type: Number },
+    otp: { type: String },
     otpExpires: { type: Date },
 
     familyDetails: {
