@@ -20,7 +20,7 @@ const createOwner = async (req, res) => {
     // 3️⃣ Prepare data (role defaults to resident)
     const ownerData = {
       ...req.body,
-      role: req.body.role || "RESIDENT",
+      role: req.body.role ? req.body.role.toUpperCase() : "RESIDENT",
     };
 
     // 4️⃣ Create owner
@@ -70,13 +70,18 @@ const updateOwner = async (req, res) => {
       return res.status(404).json({ error: "Owner not found" });
     }
 
-    // 🔒 Prevent phone number update
-    const { phoneNumber, ...updateData } = req.body;
+    const { phoneNumber, role, ...rest } = req.body;
 
-    // Update other allowed fields
+    const updateData = {
+      ...rest,
+
+      // ✅ FIX: normalize role if provided
+      ...(role && { role: role.toUpperCase() }),
+    };
+
     const updatedOwner = await Owner.findByIdAndUpdate(id, updateData, {
-      new: true, // Return updated document
-      runValidators: true, // Validate before update
+      new: true,
+      runValidators: true,
     });
 
     res.json({
@@ -133,7 +138,7 @@ const assignTreasurer = async (req, res) => {
     const updatedOwner = await Owner.findByIdAndUpdate(
       ownerId,
       { role: "TREASURER" },
-      { new: true }
+      { new: true },
     );
 
     if (!updatedOwner) {

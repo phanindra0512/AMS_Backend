@@ -100,7 +100,7 @@ const router = express.Router();
  *                 status: "Owner"
  *                 occupation: "Software Engineer"
  *                 upiID: "raju@upi"
- *                 role: "resident"
+ *                 role: "RESIDENT"
  *                 familyDetails:
  *                   spouseName: "Anita Kumar"
  *                   numberOfChildren: 2
@@ -142,7 +142,7 @@ const router = express.Router();
  *                 status: "Owner"
  *                 occupation: "Software Engineer"
  *                 upiID: "raju@upi"
- *                 role: "resident"
+ *                 role: "RESIDENT"
  *                 createdAt: "2025-10-24T11:49:43.603Z"
  *                 updatedAt: "2025-10-24T11:49:43.603Z"
  *       500:
@@ -181,7 +181,7 @@ const router = express.Router();
  *               status: "Owner"
  *               occupation: "Software Engineer"
  *               upiID: "raju@upi"
- *               role: "resident"
+ *               role: "RESIDENT"
  *               familyDetails:
  *                 spouseName: "Anita Kumar"
  *                 numberOfChildren: 2
@@ -278,7 +278,7 @@ const router = express.Router();
  *                 status: "Owner"
  *                 occupation: "Manager"
  *                 upiID: "rajuupdated@upi"
- *                 role: "resident"
+ *                 role: "RESIDENT"
  *                 createdAt: "2025-10-24T11:49:43.603Z"
  *                 updatedAt: "2025-10-25T09:12:11.000Z"
  *       404:
