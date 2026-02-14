@@ -50,6 +50,7 @@ const payMaintenance = async (req, res) => {
 
     // 2️⃣ Create payment
     const payment = await MaintenancePayment.create({
+      transactionId,
       month,
       year,
       flatNumber,
