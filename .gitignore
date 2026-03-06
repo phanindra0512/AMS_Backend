@@ -7,6 +7,9 @@ pnpm-debug.log
 
 # Environment variables
 .env
+.env.*
+.env.development
+.env.production
 
 # Uploaded files
 uploads/

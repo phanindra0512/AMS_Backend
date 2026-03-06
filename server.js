@@ -1,9 +1,15 @@
 require("dns").setDefaultResultOrder("ipv4first");
-require("dotenv").config();
+
+const dotenv = require("dotenv");
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
 const { swaggerUi, swaggerSpec } = require("./swagger");
+
+const envFile =
+  process.env.NODE_ENV === "production" ? ".env.production" : ".env.development";
+
+dotenv.config({ path: envFile });
 
 const app = express();
 
