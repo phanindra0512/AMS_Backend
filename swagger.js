@@ -9,13 +9,18 @@ const options = {
       version: "1.0.0",
       description: "AMS APIs with JWT Authentication",
     },
+
     servers: [
       {
         url: "http://localhost:5000",
+        description: "Development server",
+      },
+      {
+        url: "https://ams-backend-l7l4.onrender.com",
+        description: "Production server",
       },
     ],
 
-    // 🔐 ADD THIS PART
     components: {
       securitySchemes: {
         bearerAuth: {
@@ -26,7 +31,6 @@ const options = {
       },
     },
 
-    // 🔐 GLOBAL SECURITY (can override per route)
     security: [
       {
         bearerAuth: [],
