@@ -165,7 +165,7 @@ const auth = require("../middlewares/auth");
  * @swagger
  * /api/maintenance/payments:
  *   get:
- *     summary: Get all maintenance payments by month and year
+ *     summary: Get all maintenance payments by month and year (Admin & Treasurer only)
  *     tags: [Maintenance]
  *     security:
  *       - bearerAuth: []
@@ -226,6 +226,9 @@ const auth = require("../middlewares/auth");
  *
  *       400:
  *         description: Month and year required
+ *
+ *       403:
+ *         description: Forbidden (Only ADMIN or TREASURER allowed)
  *
  *       500:
  *         description: Server error
@@ -346,11 +349,10 @@ const auth = require("../middlewares/auth");
 
 // Routes
 router.post("/pay", auth, upload.single("receipt"), payMaintenance);
-router.get("/payments", auth, getPaymentsByMonthYear);
+router.get("/payments", auth, authorize("ADMIN", "TREASURER"), getPaymentsByMonthYear);
 router.get(
   "/owners/:ownerId/payments",
   auth,
-  authorize("ADMIN", "TREASURER"),
   getPaymentsByOwnerId,
 );
 
