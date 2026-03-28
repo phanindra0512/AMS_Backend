@@ -13,6 +13,10 @@ const options = {
     servers: [
       {
         url: "http://localhost:5000",
+        description: "Local development server",
+      },
+      {
+        url: "https://ams-backend-dev.onrender.com",
         description: "Development server",
       },
       {
