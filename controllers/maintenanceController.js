@@ -70,7 +70,7 @@ const payMaintenance = async (req, res) => {
       amount,
       paymentType: paymentType.toUpperCase(),
 
-      receiptUrl: req.file ? `/uploads/receipts/${req.file.filename}` : null,
+      receiptUrl: req.file ? req.file.path : null,
 
       treasurer: {
         treasurerId: assignment.ownerId._id,
