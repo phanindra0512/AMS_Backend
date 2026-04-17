@@ -7,6 +7,7 @@ const {
   payMaintenance,
   getPaymentsByMonthYear,
   getPaymentsByOwnerId,
+  paymentApproval,
 } = require("../controllers/maintenanceController");
 const authorize = require("../middlewares/authorize");
 
@@ -347,6 +348,142 @@ const auth = require("../middlewares/auth");
  *         description: Server error
  */
 
+/**
+ * ============================================
+ *       PAYMENT APPROVAL API
+ * ============================================
+ */
+
+/**
+ * @swagger
+ * /api/maintenance/approval:
+ *   post:
+ *     summary: Approve or reject a pending payment (Treasurer only)
+ *     tags: [Maintenance]
+ *     security:
+ *       - bearerAuth: []   # JWT token required, user must be TREASURER
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - paymentId
+ *               - status
+ *             properties:
+ *               paymentId:
+ *                 type: string
+ *                 description: MongoDB ObjectId of the payment to approve/reject
+ *                 example: "66a91e123abc456def789xyz"
+ *               status:
+ *                 type: string
+ *                 enum: [APPROVED, REJECTED]
+ *                 description: Status to update the payment to
+ *                 example: "APPROVED"
+ *
+ *     responses:
+ *       200:
+ *         description: Payment approved or rejected successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: "Payment approved successfully"
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     _id:
+ *                       type: string
+ *                       example: "66a91e123abc456def789xyz"
+ *                     transactionId:
+ *                       type: string
+ *                       example: "458923741256"
+ *                     ownerId:
+ *                       type: string
+ *                       example: "65f0ab1234"
+ *                     flatNumber:
+ *                       type: string
+ *                       example: "201"
+ *                     ownerName:
+ *                       type: string
+ *                       example: "Phani"
+ *                     amount:
+ *                       type: number
+ *                       example: 1000
+ *                     paymentStatus:
+ *                       type: string
+ *                       example: "APPROVED"
+ *                     month:
+ *                       type: integer
+ *                       example: 6
+ *                     year:
+ *                       type: integer
+ *                       example: 2025
+ *                     receiptUrl:
+ *                       type: string
+ *                       example: "/uploads/receipts/1768033926076.png"
+ *                     treasurer:
+ *                       type: object
+ *                       properties:
+ *                         treasurerId:
+ *                           type: string
+ *                         treasurerName:
+ *                           type: string
+ *                         treasurerPhoneNumber:
+ *                           type: string
+ *                         treasurerUpiID:
+ *                           type: string
+ *                     createdAt:
+ *                       type: string
+ *                       format: date-time
+ *                     updatedAt:
+ *                       type: string
+ *                       format: date-time
+ *
+ *       400:
+ *         description: Invalid request or payment already processed
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: "Status must be either APPROVED or REJECTED"
+ *
+ *       403:
+ *         description: Forbidden - User is not TREASURER or not the assigned treasurer for this payment
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: "You are not the assigned treasurer for this payment"
+ *
+ *       404:
+ *         description: Payment not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: "Payment not found"
+ *
+ *       500:
+ *         description: Server error
+ */
+
 // Routes
 router.post("/pay", auth, upload.single("receipt"), payMaintenance);
 router.get("/payments", auth, authorize("ADMIN", "TREASURER"), getPaymentsByMonthYear);
@@ -355,5 +492,6 @@ router.get(
   auth,
   getPaymentsByOwnerId,
 );
+router.post("/approval", auth, authorize("TREASURER"), paymentApproval);
 
 module.exports = router;

@@ -161,8 +161,64 @@ const getPaymentsByOwnerId = async (req, res) => {
     });
   }
 };
+
+const paymentApproval = async (req, res) => {
+  try {
+    const { paymentId, status } = req.body;
+    const treasurerId = req.user.id;
+
+    // Validate inputs
+    if (!paymentId) {
+      return res.status(400).json({
+        error: "Payment ID is required",
+      });
+    }
+
+    if (!status || !["APPROVED", "REJECTED"].includes(status)) {
+      return res.status(400).json({
+        error: "Status must be either APPROVED or REJECTED",
+      });
+    }
+
+    // Find the payment
+    const payment = await MaintenancePayment.findById(paymentId);
+    if (!payment) {
+      return res.status(404).json({
+        error: "Payment not found",
+      });
+    }
+
+    // Check if payment is still pending
+    if (payment.paymentStatus !== "PENDING") {
+      return res.status(400).json({
+        error: `Payment is already ${payment.paymentStatus}. Cannot approve/reject again.`,
+      });
+    }
+
+    // Verify treasurer is the assigned treasurer for this payment
+    if (payment.treasurer.treasurerId.toString() !== treasurerId) {
+      return res.status(403).json({
+        error: "You are not the assigned treasurer for this payment",
+      });
+    }
+
+    // Update payment status
+    payment.paymentStatus = status;
+    await payment.save();
+
+    res.status(200).json({
+      success: true,
+      message: `Payment ${status.toLowerCase()} successfully`,
+      data: payment,
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
 module.exports = {
   payMaintenance,
   getPaymentsByMonthYear,
   getPaymentsByOwnerId,
+  paymentApproval,
 };
