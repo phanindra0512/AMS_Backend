@@ -4,6 +4,7 @@ const dotenv = require("dotenv");
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
+const path = require("path");
 const { swaggerUi, swaggerSpec } = require("./swagger");
 
 const envFile =
@@ -45,8 +46,8 @@ app.use("/api/auth", authRoutes);
 
 const maintenanceRoutes = require("./routes/maintenanceRoutes");
 
-// Serve uploaded files
-app.use("/uploads", express.static("uploads"));
+// Serve uploaded files with absolute path
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 app.use("/api/maintenance", maintenanceRoutes);
 
