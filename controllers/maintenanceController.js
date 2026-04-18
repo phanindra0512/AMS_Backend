@@ -32,19 +32,41 @@ const payMaintenance = async (req, res) => {
       });
     }
 
-    // Check duplicate transaction ID
-    const txnExists = await MaintenancePayment.findOne({ transactionId });
-    if (txnExists) {
-      return res.status(409).json({
-        error: "This transaction ID is already used",
-      });
-    }
-
     if (!month || !year) {
       return res.status(400).json({
         error: "Month and year are required",
       });
     }
+
+    // Check duplicate transaction ID - Allow reuse only if previous payment was REJECTED
+    const existingTxn = await MaintenancePayment.findOne({ transactionId });
+    if (existingTxn && existingTxn.paymentStatus !== "REJECTED") {
+      return res.status(409).json({
+        error: "This transaction ID is already used",
+      });
+    }
+
+    // Check if user already has an APPROVED or PENDING payment for this month
+    const existingPayment = await MaintenancePayment.findOne({
+      ownerId,
+      month,
+      year,
+      paymentStatus: { $in: ["APPROVED", "PENDING"] },
+    });
+
+    if (existingPayment) {
+      return res.status(409).json({
+        error: "Maintenance already paid for this month",
+      });
+    }
+
+    // Delete any REJECTED payment for this month/year by this owner
+    await MaintenancePayment.deleteOne({
+      ownerId,
+      month,
+      year,
+      paymentStatus: "REJECTED",
+    });
 
     // 1️⃣ Fetch treasurer for that month & year
     const assignment = await TreasurerAssignment.findOne({
