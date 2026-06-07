@@ -32,19 +32,41 @@ const payMaintenance = async (req, res) => {
       });
     }
 
-    // Check duplicate transaction ID
-    const txnExists = await MaintenancePayment.findOne({ transactionId });
-    if (txnExists) {
-      return res.status(409).json({
-        error: "This transaction ID is already used",
-      });
-    }
-
     if (!month || !year) {
       return res.status(400).json({
         error: "Month and year are required",
       });
     }
+
+    // Check duplicate transaction ID - Allow reuse only if previous payment was REJECTED
+    const existingTxn = await MaintenancePayment.findOne({ transactionId });
+    if (existingTxn && existingTxn.paymentStatus !== "REJECTED") {
+      return res.status(409).json({
+        error: "This transaction ID is already used",
+      });
+    }
+
+    // Check if user already has an APPROVED or PENDING payment for this month
+    const existingPayment = await MaintenancePayment.findOne({
+      ownerId,
+      month,
+      year,
+      paymentStatus: { $in: ["APPROVED", "PENDING"] },
+    });
+
+    if (existingPayment) {
+      return res.status(409).json({
+        error: "Maintenance already paid for this month",
+      });
+    }
+
+    // Delete any REJECTED payment for this month/year by this owner
+    await MaintenancePayment.deleteOne({
+      ownerId,
+      month,
+      year,
+      paymentStatus: "REJECTED",
+    });
 
     // 1️⃣ Fetch treasurer for that month & year
     const assignment = await TreasurerAssignment.findOne({
@@ -70,7 +92,7 @@ const payMaintenance = async (req, res) => {
       amount,
       paymentType: paymentType.toUpperCase(),
 
-      receiptUrl: req.file ? `/uploads/receipts/${req.file.filename}` : null,
+      receiptUrl: req.file ? req.file.path : null,
 
       treasurer: {
         treasurerId: assignment.ownerId._id,
@@ -111,11 +133,17 @@ const getPaymentsByMonthYear = async (req, res) => {
       year: Number(year),
     }).sort({ createdAt: -1 });
 
+    const totalAmount = payments.reduce(
+      (sum, payment) => sum + payment.amount,
+      0
+    );
+
     res.status(200).json({
       success: true,
       month: Number(month),
       year: Number(year),
       totalPayments: payments.length,
+      totalAmount,
       data: payments,
     });
   } catch (err) {

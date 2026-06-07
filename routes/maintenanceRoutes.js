@@ -204,6 +204,9 @@ const auth = require("../middlewares/auth");
  *                 totalPayments:
  *                   type: integer
  *                   example: 2
+ *                totalAmount:totalAmount:
+ *                   type: number
+ *                   example: 2000
  *                 data:
  *                   type: array
  *                   items:
@@ -486,12 +489,13 @@ const auth = require("../middlewares/auth");
 
 // Routes
 router.post("/pay", auth, upload.single("receipt"), payMaintenance);
-router.get("/payments", auth, authorize("ADMIN", "TREASURER"), getPaymentsByMonthYear);
 router.get(
-  "/owners/:ownerId/payments",
+  "/payments",
   auth,
-  getPaymentsByOwnerId,
+  authorize("ADMIN", "TREASURER"),
+  getPaymentsByMonthYear,
 );
+router.get("/owners/:ownerId/payments", auth, getPaymentsByOwnerId);
 router.post("/approval", auth, authorize("TREASURER"), paymentApproval);
 
 module.exports = router;
