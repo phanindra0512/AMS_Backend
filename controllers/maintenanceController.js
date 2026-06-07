@@ -133,11 +133,17 @@ const getPaymentsByMonthYear = async (req, res) => {
       year: Number(year),
     }).sort({ createdAt: -1 });
 
+    const totalAmount = payments.reduce(
+      (sum, payment) => sum + payment.amount,
+      0
+    );
+
     res.status(200).json({
       success: true,
       month: Number(month),
       year: Number(year),
       totalPayments: payments.length,
+      totalAmount,
       data: payments,
     });
   } catch (err) {
