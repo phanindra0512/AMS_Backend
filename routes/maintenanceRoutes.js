@@ -1,5 +1,3 @@
-// routes/maintenanceRoutes.js
-
 const express = require("express");
 const router = express.Router();
 
@@ -8,6 +6,7 @@ const {
   getPaymentsByMonthYear,
   getPaymentsByOwnerId,
   paymentApproval,
+  getTreasurerAmount,
 } = require("../controllers/maintenanceController");
 const authorize = require("../middlewares/authorize");
 
@@ -15,22 +14,10 @@ const upload = require("../middlewares/upload");
 const auth = require("../middlewares/auth");
 
 /**
- * ============================================
- *              SWAGGER TAG
- * ============================================
- */
-
-/**
  * @swagger
  * tags:
  *   name: Maintenance
  *   description: Maintenance payment related APIs
- */
-
-/**
- * ============================================
- *          PAY MAINTENANCE API
- * ============================================
  */
 
 /**
@@ -157,16 +144,11 @@ const auth = require("../middlewares/auth");
  */
 
 /**
- * ============================================
- *        GET PAYMENTS BY MONTH/YEAR
- * ============================================
- */
-
 /**
  * @swagger
  * /api/maintenance/payments:
  *   get:
- *     summary: Get all maintenance payments by month and year (Admin & Treasurer only)
+ *     summary: Get maintenance payments by month and year
  *     tags: [Maintenance]
  *     security:
  *       - bearerAuth: []
@@ -176,66 +158,74 @@ const auth = require("../middlewares/auth");
  *         required: true
  *         schema:
  *           type: integer
- *           example: 6
+ *         example: 4
+ *         description: Month number (1-12)
+ *
  *       - in: query
  *         name: year
  *         required: true
  *         schema:
  *           type: integer
- *           example: 2025
+ *         example: 2026
+ *         description: Year
  *
  *     responses:
  *       200:
- *         description: List of maintenance payments
+ *         description: Payments fetched successfully
  *         content:
  *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: true
- *                 month:
- *                   type: integer
- *                   example: 6
- *                 year:
- *                   type: integer
- *                   example: 2025
- *                 totalPayments:
- *                   type: integer
- *                   example: 2
- *                totalAmount:totalAmount:
- *                   type: number
- *                   example: 2000
- *                 data:
- *                   type: array
- *                   items:
- *                     type: object
- *                     properties:
- *                       flatNumber:
- *                         type: string
- *                         example: "201"
- *                       ownerName:
- *                         type: string
- *                         example: "Phani"
- *                       amount:
- *                         type: number
- *                         example: 1000
- *                       paymentType:
- *                         type: string
- *                         example: "UPI"
- *                       paymentStatus:
- *                         type: string
- *                         example: "PENDING"
+ *             example:
+ *               success: true
+ *               month: 4
+ *               year: 2026
+ *               totalPayments: 2
+ *               totalAmount: 2000
+ *               expensesAmount: 800
+ *               balanceAmount: 1200
+ *               data:
+ *                 - _id: "69e3df1ad606f589ac23033f"
+ *                   transactionId: "123456789011"
+ *                   ownerId: "69c8e1b4d7113107cc7bea55"
+ *                   month: 4
+ *                   year: 2026
+ *                   flatNumber: "G1"
+ *                   ownerName: "Raja Rao"
+ *                   ownerMobile: "7337468903"
+ *                   amount: 1000
+ *                   paymentType: "UPI"
+ *                   paymentStatus: "APPROVED"
+ *                   receiptUrl: "https://res.cloudinary.com/example.jpg"
+ *                   createdAt: "2026-04-18T19:44:26.771Z"
+ *                   updatedAt: "2026-04-18T19:46:46.155Z"
+ *                   treasurer:
+ *                     treasurerId: "69b5907ae47d27e70fec34c2"
+ *                     treasurerName: "Raju Kumar"
+ *                     treasurerPhoneNumber: "9949544127"
+ *                     treasurerUpiID: "raju@upi"
  *
  *       400:
- *         description: Month and year required
+ *         description: Month and year are required
+ *         content:
+ *           application/json:
+ *             example:
+ *               success: false
+ *               message: "Month and year are required"
  *
  *       403:
- *         description: Forbidden (Only ADMIN or TREASURER allowed)
+ *         description: Only ADMIN or TREASURER can access
+ *         content:
+ *           application/json:
+ *             example:
+ *               success: false
+ *               message: "Access denied"
  *
  *       500:
  *         description: Server error
+ *         content:
+ *           application/json:
+ *             example:
+ *               success: false
+ *               message: "Internal server error"
  */
 
 /**
@@ -349,12 +339,6 @@ const auth = require("../middlewares/auth");
  *
  *       500:
  *         description: Server error
- */
-
-/**
- * ============================================
- *       PAYMENT APPROVAL API
- * ============================================
  */
 
 /**
@@ -487,15 +471,45 @@ const auth = require("../middlewares/auth");
  *         description: Server error
  */
 
-// Routes
+/**
+ * @swagger
+ * /api/maintenance/treasurer-amount:
+ *   get:
+ *     summary: Get overall treasurer balance amount
+ *     tags: [Maintenance]
+ *     security:
+ *       - bearerAuth: []
+ *
+ *     responses:
+ *       200:
+ *         description: Treasurer amount fetched successfully
+ *         content:
+ *           application/json:
+ *             example:
+ *               success: true
+ *               totalCollection: 50000
+ *               totalExpenses: 15000
+ *               treasurerAmount: 35000
+ *
+ *       401:
+ *         description: Unauthorized
+ *         content:
+ *           application/json:
+ *             example:
+ *               error: Invalid token
+ *
+ *       500:
+ *         description: Server error
+ *         content:
+ *           application/json:
+ *             example:
+ *               error: Internal server error
+ */
+
 router.post("/pay", auth, upload.single("receipt"), payMaintenance);
-router.get(
-  "/payments",
-  auth,
-  authorize("ADMIN", "TREASURER"),
-  getPaymentsByMonthYear,
-);
+router.get("/payments", auth, getPaymentsByMonthYear);
 router.get("/owners/:ownerId/payments", auth, getPaymentsByOwnerId);
 router.post("/approval", auth, authorize("TREASURER"), paymentApproval);
+router.get("/treasurer-amount", auth, getTreasurerAmount);
 
 module.exports = router;
