@@ -67,13 +67,6 @@ const {
  *       500:
  *         description: Server error
  */
-router.post(
-  "/addExpense",
-  auth,
-  authorize("TREASURER"),
-  upload.single("image"),
-  addExpense
-);
 
 /**
  * @swagger
@@ -112,11 +105,14 @@ router.post(
  *       500:
  *         description: Server error
  */
-router.get(
-  "/getAllExpenseByMonthYear",
+router.post(
+  "/addExpense",
   auth,
   authorize("ADMIN", "TREASURER"),
-  getExpensesByMonthYear
+  upload.single("image"),
+  addExpense,
 );
+
+router.get("/getAllExpenseByMonthYear", auth, getExpensesByMonthYear);
 
 module.exports = router;
