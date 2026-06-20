@@ -2,6 +2,7 @@
 const MaintenancePayment = require("../models/MaintenancePayment");
 const TreasurerAssignment = require("../models/TreasurerAssignment");
 const Owner = require("../models/Owners");
+const Expense = require("../models/Expense");
 
 const payMaintenance = async (req, res) => {
   try {
@@ -128,25 +129,54 @@ const getPaymentsByMonthYear = async (req, res) => {
       });
     }
 
+    const monthNumber = Number(month);
+    const yearNumber = Number(year);
+
+    // Maintenance Payments
     const payments = await MaintenancePayment.find({
-      month: Number(month),
-      year: Number(year),
+      month: monthNumber,
+      year: yearNumber,
     }).sort({ createdAt: -1 });
 
-    const totalAmount = payments
-      .filter((payment) => payment.paymentStatus === "APPROVED")
-      .reduce((sum, payment) => sum + payment.amount, 0);
+    // Approved collections only
+    const approvedPayments = payments.filter(
+      (payment) => payment.paymentStatus === "APPROVED"
+    );
+
+    const totalCollection = approvedPayments.reduce(
+      (sum, payment) => sum + payment.amount,
+      0
+    );
+
+    // Expenses for selected month/year
+    const expenses = await Expense.find({
+      month: monthNumber,
+      year: yearNumber,
+    });
+
+    const totalExpenses = expenses.reduce(
+      (sum, expense) => sum + Number(expense.amountPaid || 0),
+      0
+    );
+
+    const balanceAmount = totalCollection - totalExpenses;
 
     res.status(200).json({
       success: true,
-      month: Number(month),
-      year: Number(year),
+      month: monthNumber,
+      year: yearNumber,
+
       totalPayments: payments.length,
-      totalAmount,
+      totalCollection,
+      totalExpenses,
+      balanceAmount,
+
       data: payments,
     });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({
+      error: err.message,
+    });
   }
 };
 
@@ -243,9 +273,44 @@ const paymentApproval = async (req, res) => {
   }
 };
 
+const getTreasurerAmount = async (req, res) => {
+  try {
+    // Total approved collections
+    const approvedPayments = await MaintenancePayment.find({
+      paymentStatus: "APPROVED",
+    });
+
+    const totalCollection = approvedPayments.reduce(
+      (sum, payment) => sum + Number(payment.amount || 0),
+      0
+    );
+
+    // Total expenses
+    const expenses = await Expense.find();
+
+    const totalExpenses = expenses.reduce(
+      (sum, expense) => sum + Number(expense.amountPaid || 0),
+      0
+    );
+
+    const treasurerAmount = totalCollection - totalExpenses;
+
+    return res.status(200).json({
+      success: true,
+      totalCollection,
+      totalExpenses,
+      treasurerAmount,
+    });
+  } catch (err) {
+    return res.status(500).json({
+      error: err.message,
+    });
+  }
+};
 module.exports = {
   payMaintenance,
   getPaymentsByMonthYear,
   getPaymentsByOwnerId,
   paymentApproval,
+  getTreasurerAmount,
 };
