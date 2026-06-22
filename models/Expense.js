@@ -4,8 +4,20 @@ const expenseSchema = new mongoose.Schema(
   {
     serviceType: {
       type: String,
-      enum: ["PLUMBER", "ELECTRICIAN", "CARPENTER", "MUNICIPALITY"],
+      enum: [
+        "PLUMBER",
+        "ELECTRICIAN",
+        "CARPENTER",
+        "MUNICIPALITY",
+        "OTHER",
+      ],
       required: true,
+    },
+
+    customServiceType: {
+      type: String,
+      default: null,
+      trim: true,
     },
 
     serviceProviderName: {

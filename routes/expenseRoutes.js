@@ -39,19 +39,35 @@ const {
  *             properties:
  *               serviceType:
  *                 type: string
- *                 enum: [PLUMBER, ELECTRICIAN, CARPENTER, MUNICIPALITY]
+ *                 enum:
+ *                   - PLUMBER
+ *                   - ELECTRICIAN
+ *                   - CARPENTER
+ *                   - MUNICIPALITY
+ *                   - OTHER
+ *                 example: OTHER
+ *
+ *               customServiceType:
+ *                 type: string
+ *                 example: PAINTER
+ *                 description: Required only when serviceType is OTHER
+ *
  *               serviceProviderName:
  *                 type: string
  *                 example: Ramesh
+ *
  *               contactNumber:
  *                 type: string
  *                 example: "9876543210"
+ *
  *               amountPaid:
  *                 type: number
  *                 example: 2500
+ *
  *               image:
  *                 type: string
  *                 format: binary
+ *
  *     responses:
  *       201:
  *         description: Expense added successfully
@@ -60,10 +76,13 @@ const {
  *             example:
  *               success: true
  *               message: Expense added successfully
+ *
  *       400:
  *         description: Validation error
+ *
  *       403:
  *         description: Access denied
+ *
  *       500:
  *         description: Server error
  */
