@@ -5,6 +5,7 @@ const addExpense = async (req, res) => {
   try {
     const {
       serviceType,
+      customServiceType,
       serviceProviderName,
       contactNumber,
       amountPaid,
@@ -21,6 +22,16 @@ const addExpense = async (req, res) => {
       });
     }
 
+    // If OTHER selected, customServiceType is mandatory
+    if (
+      serviceType.toUpperCase() === "OTHER" &&
+      !customServiceType
+    ) {
+      return res.status(400).json({
+        error: "Custom service type is required when serviceType is OTHER",
+      });
+    }
+
     const treasurer = await Owner.findById(req.user.id);
 
     if (!treasurer) {
@@ -33,6 +44,12 @@ const addExpense = async (req, res) => {
 
     const expense = await Expense.create({
       serviceType: serviceType.toUpperCase(),
+
+      customServiceType:
+        serviceType.toUpperCase() === "OTHER"
+          ? customServiceType
+          : null,
+
       serviceProviderName,
       contactNumber,
       amountPaid,
