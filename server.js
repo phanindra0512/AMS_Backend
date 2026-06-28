@@ -54,5 +54,8 @@ app.use("/api/maintenance", maintenanceRoutes);
 const expenseRoutes = require("./routes/expenseRoutes");
 app.use("/api/expenses", expenseRoutes);
 
+const serviceRoutes = require("./routes/serviceRoutes");
+app.use("/api/services", serviceRoutes);
+
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
