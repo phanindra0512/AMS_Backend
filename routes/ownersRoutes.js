@@ -432,8 +432,8 @@ const router = express.Router();
  * @swagger
  * /api/owners/assign-treasurer:
  *   post:
- *     summary: Assign Treasurer for a Month and Year
- *     description: Assign an owner as treasurer for a given month and year.
+ *     summary: Assign Treasurer for a Month and Year (ADMIN)
+ *     description: Assign an owner as treasurer for a given month and year. This operation is restricted to administrators.
  *     tags: [Owners]
  *     security:
  *       - bearerAuth: []
@@ -498,6 +498,16 @@ const router = express.Router();
  *                 error:
  *                   type: string
  *                   example: Treasurer already assigned for 11-2025
+ *       403:
+ *         description: Forbidden. Only administrators can assign a treasurer.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   example: Access denied
  *       500:
  *         description: Internal server error.
  *         content:
