@@ -23,7 +23,7 @@ const maintenancePaymentSchema = new mongoose.Schema(
     amount: { type: Number, required: true },
     paymentType: {
       type: String,
-      enum: ["UPI", "Cash", "Bank Transfer"],
+      enum: ["UPI", "CASH"],
       required: true,
     },
     paymentStatus: {

@@ -24,7 +24,7 @@ const auth = require("../middlewares/auth");
  * @swagger
  * /api/maintenance/pay:
  *   post:
- *     summary: Pay monthly maintenance with optional receipt upload
+ *     summary: Pay monthly maintenance by UPI or cash
  *     tags: [Maintenance]
  *     security:
  *       - bearerAuth: []   # JWT token required
@@ -69,12 +69,13 @@ const auth = require("../middlewares/auth");
  *                 example: 1000
  *               paymentType:
  *                 type: string
- *                 enum: [UPI, CASH, BANK TRANSFER]
+ *                 enum: [UPI, CASH]
  *                 example: UPI
+ *                 description: UPI requires a receipt upload; CASH does not.
  *               receipt:
  *                 type: string
  *                 format: binary
- *                 description: Optional receipt image upload
+ *                 description: Required for UPI payments; omit for CASH payments.
  *
  *     responses:
  *       201:
@@ -129,9 +130,14 @@ const auth = require("../middlewares/auth");
  *                     receiptUrl:
  *                       type: string
  *                       example: "/uploads/receipts/1768033926076.png"
+ *                       description: Present for UPI payments; omitted for CASH payments.
  *
  *       400:
  *         description: Invalid request data
+ *         content:
+ *           application/json:
+ *             example:
+ *               error: "Receipt is required for UPI payments"
  *
  *       404:
  *         description: Owner or Treasurer not found

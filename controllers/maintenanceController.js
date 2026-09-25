@@ -18,6 +18,12 @@ const payMaintenance = async (req, res) => {
       paymentType,
     } = req.body;
 
+    if (paymentType === "UPI" && !req.file) {
+      return res.status(400).json({
+        error: "Receipt is required for UPI payments",
+      });
+    }
+
     // Validate owner exists
     const owner = await Owner.findById(ownerId);
     console.log("owner ---> ", owner);
@@ -91,9 +97,8 @@ const payMaintenance = async (req, res) => {
       ownerName,
       ownerMobile,
       amount,
-      paymentType: paymentType.toUpperCase(),
-
-      receiptUrl: req.file ? req.file.path : null,
+      paymentType,
+      ...(req.file && { receiptUrl: req.file.path }),
 
       treasurer: {
         treasurerId: assignment.ownerId._id,
