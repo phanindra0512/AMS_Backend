@@ -280,6 +280,8 @@ const paymentApproval = async (req, res) => {
 
 const getTreasurerAmount = async (req, res) => {
   try {
+    const openingBalance = 137;
+
     // Total approved collections
     const approvedPayments = await MaintenancePayment.find({
       paymentStatus: "APPROVED",
@@ -298,10 +300,11 @@ const getTreasurerAmount = async (req, res) => {
       0
     );
 
-    const treasurerAmount = totalCollection - totalExpenses;
+    const treasurerAmount = openingBalance + totalCollection - totalExpenses;
 
     return res.status(200).json({
       success: true,
+      openingBalance,
       totalCollection,
       totalExpenses,
       treasurerAmount,
